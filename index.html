@@ -1,651 +1,1184 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#0E7C86">
-<title>Aquarium Water Log</title>
-<style>
-  :root{
-    --ink:#0F2A33; --muted:#5C7178; --paper:#F4F7F7; --surface:#FFFFFF;
-    --aqua:#0E7C86; --aqua-soft:#E3F0F0; --line:#DCE6E6;
-    --safe:#1B8A5A; --safe-bg:#E7F4ED;
-    --caution:#B5740C; --caution-bg:#FBF1DF;
-    --danger:#BE3A2B; --danger-bg:#FBE9E6;
-    --shadow:0 1px 2px rgba(15,42,51,.06), 0 8px 24px rgba(15,42,51,.06);
-    --radius:14px;
-    font-synthesis-weight:none;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;background:var(--paper);color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;}
-  body{padding:0 0 120px;line-height:1.45;}
-  .wrap{max-width:520px;margin:0 auto;padding:0 16px;}
-  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#0E7C86">
+  <title>Aquarium Water Log</title>
+  <style>
+    :root {
+      --ink: #0F2A33;
+      --muted: #5C7178;
+      --paper: #F4F7F7;
+      --surface: #FFFFFF;
+      --aqua: #0E7C86;
+      --aqua-soft: #E3F0F0;
+      --line: #DCE6E6;
+      --safe: #1B8A5A;
+      --safe-bg: #E7F4ED;
+      --caution: #B5740C;
+      --caution-bg: #FBF1DF;
+      --danger: #BE3A2B;
+      --danger-bg: #FBE9E6;
+      --shadow: 0 1px 2px rgba(15, 42, 51, .06), 0 8px 24px rgba(15, 42, 51, .06);
+      --radius: 14px;
+      font-synthesis-weight: none;
+    }
 
-  header.top{padding:22px 0 8px;}
-  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--aqua);font-weight:700;}
-  h1{font-size:24px;font-weight:760;margin:2px 0 0;letter-spacing:-.01em;}
-  .sub{color:var(--muted);font-size:13px;margin-top:3px;}
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  /* hero status */
-  .hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:16px;margin-top:16px;}
-  .hero .when{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
-  .hero .when .date{font-size:13px;color:var(--muted);}
-  .verdict{display:inline-flex;align-items:center;gap:8px;font-weight:680;font-size:15px;margin-top:2px;}
-  .verdict .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
-  .params{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
-  .param{border-radius:11px;padding:10px 10px 11px;border:1px solid transparent;}
-  .param .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.85;}
-  .param .k .kf{opacity:.55;font-weight:600;margin-left:1px;}
-  .param .v{font-size:22px;font-weight:740;margin-top:3px;line-height:1;}
-  .param .u{font-size:10px;font-weight:600;opacity:.7;margin-left:2px;}
-  .param.safe{background:var(--safe-bg);color:var(--safe);border-color:#cdebda;}
-  .param.caution{background:var(--caution-bg);color:var(--caution);border-color:#f1dcb4;}
-  .param.danger{background:var(--danger-bg);color:var(--danger);border-color:#f3cfc9;}
-  .param.info{background:var(--aqua-soft);color:var(--aqua);border-color:#cce4e4;}
-  .ph-row{display:flex;gap:10px;margin-top:10px;}
-  .ph-row .param{flex:1;}
+    html,
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  section{margin-top:22px;}
-  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .sec-head h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
-    font-weight:700;margin:0;}
+    body {
+      padding: 0 0 120px;
+      line-height: 1.45;
+    }
 
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);overflow:hidden;}
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
 
-  /* charts */
-  .chart{padding:14px 14px 10px;}
-  .chart + .chart{border-top:1px solid var(--line);}
-  .chart .ct{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;}
-  .chart .ct .label{font-size:12.5px;font-weight:680;}
-  .chart .ct .legend{font-size:11px;color:var(--muted);display:flex;gap:12px;}
-  .chart .ct .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
-  .chart svg{width:100%;height:auto;display:block;}
+    .num {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
 
-  /* table */
-  .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  table{border-collapse:collapse;width:100%;font-size:13px;min-width:430px;}
-  thead th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-    font-weight:700;text-align:right;padding:11px 10px;border-bottom:1px solid var(--line);
-    white-space:nowrap;background:var(--surface);}
-  thead th:first-child{text-align:left;}
-  tbody td{padding:11px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;}
-  tbody td:first-child{text-align:left;font-weight:600;}
-  tbody tr:last-child td{border-bottom:none;}
-  tbody tr{cursor:pointer;}
-  tbody tr:active{background:var(--aqua-soft);}
-  .pill{display:inline-block;min-width:34px;padding:3px 7px;border-radius:999px;font-weight:680;
-    font-variant-numeric:tabular-nums;}
-  .pill.safe{background:var(--safe-bg);color:var(--safe);}
-  .pill.caution{background:var(--caution-bg);color:var(--caution);}
-  .pill.danger{background:var(--danger-bg);color:var(--danger);}
-  .wc-tag{color:var(--aqua);font-weight:680;}
-  .dash{color:var(--line);}
-  tbody tr.note-row td{text-align:left;padding:0 10px 11px;border-bottom:1px solid var(--line);
-    color:var(--muted);font-size:12px;font-style:italic;white-space:normal;line-height:1.4;}
-  tbody tr.note-row{cursor:pointer;}
-  tbody tr:has(+ tr.note-row) td{border-bottom:none;}
-  .hero-note{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);
-    font-size:12.5px;color:var(--muted);font-style:italic;line-height:1.45;}
+    header.top {
+      padding: 22px 0 8px;
+    }
 
-  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-  .btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);
-    font-size:13px;font-weight:640;padding:10px 14px;border-radius:10px;cursor:pointer;
-    display:inline-flex;align-items:center;gap:7px;}
-  .btn:active{background:var(--paper);}
-  .btn svg{width:15px;height:15px;}
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--aqua);
+      font-weight: 700;
+    }
 
-  .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;}
-  .note b{color:var(--ink);font-weight:650;}
-  .legend-key{font-size:11.5px;color:var(--muted);margin:9px 2px 0;letter-spacing:.01em;}
+    h1 {
+      font-size: 24px;
+      font-weight: 760;
+      margin: 2px 0 0;
+      letter-spacing: -.01em;
+    }
 
-  /* FAB */
-  .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:max(20px,env(safe-area-inset-bottom));
-    background:var(--aqua);color:#fff;border:none;border-radius:999px;
-    padding:15px 26px;font-size:16px;font-weight:700;cursor:pointer;
-    box-shadow:0 6px 20px rgba(14,124,134,.4);display:inline-flex;align-items:center;gap:9px;z-index:40;}
-  .fab:active{transform:translateX(-50%) scale(.97);}
-  .fab svg{width:19px;height:19px;}
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
 
-  /* sheet */
-  .scrim{position:fixed;inset:0;background:rgba(15,42,51,.4);opacity:0;pointer-events:none;
-    transition:opacity .22s;z-index:50;}
-  .scrim.open{opacity:1;pointer-events:auto;}
-  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);
-    border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(15,42,51,.18);
-    transform:translateY(110%);transition:transform .26s cubic-bezier(.2,.8,.2,1);
-    max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding-bottom:calc(20px + env(safe-area-inset-bottom));}
-  .sheet.open{transform:translateY(0);}
-  .sheet-inner{max-width:520px;margin:0 auto;padding:8px 18px 0;}
-  .grab{width:38px;height:4px;border-radius:999px;background:var(--line);margin:10px auto 4px;}
-  .sheet h3{font-size:18px;font-weight:740;margin:6px 0 2px;}
-  .sheet .lead{font-size:12.5px;color:var(--muted);margin:0 0 8px;}
+    /* hero status */
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-top: 16px;
+    }
 
-  .field{margin-top:16px;}
-  .field > label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
-    font-weight:700;color:var(--muted);margin-bottom:7px;}
-  .field input[type=date],.field input[type=number]{width:100%;font-size:16px;font-weight:600;
-    padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper);
-    color:var(--ink);font-variant-numeric:tabular-nums;}
-  .field textarea{width:100%;font-size:15px;font-weight:500;padding:11px 13px;border:1px solid var(--line);
-    border-radius:11px;background:var(--paper);color:var(--ink);resize:vertical;min-height:46px;
-    font-family:inherit;line-height:1.4;}
-  .field input:focus,.field textarea:focus{outline:2px solid var(--aqua);outline-offset:0;border-color:var(--aqua);background:#fff;}
-  .ph-fields{display:flex;gap:12px;}
-  .ph-fields .field{flex:1;margin-top:0;}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-  .chip{font-size:13px;font-weight:640;padding:7px 12px;border-radius:999px;border:1px solid var(--line);
-    background:var(--surface);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;}
-  .chip:active{background:var(--paper);}
-  .chip.on{background:var(--aqua);border-color:var(--aqua);color:#fff;}
+    .hero .when {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
 
-  .sheet-actions{display:flex;gap:10px;margin-top:24px;}
-  .sheet-actions .btn-primary{flex:1;justify-content:center;background:var(--aqua);color:#fff;
-    border:none;font-size:16px;font-weight:720;padding:14px;border-radius:12px;cursor:pointer;}
-  .sheet-actions .btn-primary:active{filter:brightness(.95);}
-  .btn-del{border:1px solid var(--danger);color:var(--danger);background:#fff;font-weight:680;
-    padding:14px 16px;border-radius:12px;cursor:pointer;font-size:15px;}
-  .hidden{display:none !important;}
-  input[type=file]{display:none;}
-  .banner{font-size:12px;color:var(--caution);background:var(--caution-bg);border:1px solid #f1dcb4;
-    border-radius:10px;padding:9px 12px;margin-top:14px;}
-</style>
+    .hero .when .date {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 680;
+      font-size: 15px;
+      margin-top: 2px;
+    }
+
+    .verdict .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .params {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .param {
+      border-radius: 11px;
+      padding: 10px 10px 11px;
+      border: 1px solid transparent;
+    }
+
+    .param .k {
+      font-size: 10.5px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: .85;
+    }
+
+    .param .k .kf {
+      opacity: .55;
+      font-weight: 600;
+      margin-left: 1px;
+    }
+
+    .param .v {
+      font-size: 22px;
+      font-weight: 740;
+      margin-top: 3px;
+      line-height: 1;
+    }
+
+    .param .u {
+      font-size: 10px;
+      font-weight: 600;
+      opacity: .7;
+      margin-left: 2px;
+    }
+
+    .param.safe {
+      background: var(--safe-bg);
+      color: var(--safe);
+      border-color: #cdebda;
+    }
+
+    .param.caution {
+      background: var(--caution-bg);
+      color: var(--caution);
+      border-color: #f1dcb4;
+    }
+
+    .param.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #f3cfc9;
+    }
+
+    .param.info {
+      background: var(--aqua-soft);
+      color: var(--aqua);
+      border-color: #cce4e4;
+    }
+
+    .ph-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .ph-row .param {
+      flex: 1;
+    }
+
+    section {
+      margin-top: 22px;
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .sec-head h2 {
+      font-size: 13px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* charts */
+    .chart {
+      padding: 14px 14px 10px;
+    }
+
+    .chart+.chart {
+      border-top: 1px solid var(--line);
+    }
+
+    .chart .ct {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .chart .ct .label {
+      font-size: 12.5px;
+      font-weight: 680;
+    }
+
+    .chart .ct .legend {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+    }
+
+    .chart .ct .legend i {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: -1px;
+    }
+
+    .chart svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* table */
+    .tbl-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+      min-width: 430px;
+    }
+
+    thead th {
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      text-align: right;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+      background: var(--surface);
+    }
+
+    thead th:first-child {
+      text-align: left;
+    }
+
+    tbody td {
+      padding: 11px 10px;
+      text-align: right;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    tbody td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      cursor: pointer;
+    }
+
+    tbody tr:active {
+      background: var(--aqua-soft);
+    }
+
+    .pill {
+      display: inline-block;
+      min-width: 34px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-weight: 680;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pill.safe {
+      background: var(--safe-bg);
+      color: var(--safe);
+    }
+
+    .pill.caution {
+      background: var(--caution-bg);
+      color: var(--caution);
+    }
+
+    .pill.danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .wc-tag {
+      color: var(--aqua);
+      font-weight: 680;
+    }
+
+    .dash {
+      color: var(--line);
+    }
+
+    tbody tr.note-row td {
+      text-align: left;
+      padding: 0 10px 11px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-style: italic;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    tbody tr.note-row {
+      cursor: pointer;
+    }
+
+    tbody tr:has(+ tr.note-row) td {
+      border-bottom: none;
+    }
+
+    .hero-note {
+      margin-top: 13px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: 12.5px;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    .tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 640;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn:active {
+      background: var(--paper);
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    .note b {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .legend-key {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 9px 2px 0;
+      letter-spacing: .01em;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: max(20px, env(safe-area-inset-bottom));
+      background: var(--aqua);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 15px 26px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(14, 124, 134, .4);
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      z-index: 40;
+    }
+
+    .fab:active {
+      transform: translateX(-50%) scale(.97);
+    }
+
+    .fab svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* sheet */
+    .scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 42, 51, .4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s;
+      z-index: 50;
+    }
+
+    .scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 40px rgba(15, 42, 51, .18);
+      transform: translateY(110%);
+      transition: transform .26s cubic-bezier(.2, .8, .2, 1);
+      max-height: 92vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .sheet.open {
+      transform: translateY(0);
+    }
+
+    .sheet-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 8px 18px 0;
+    }
+
+    .grab {
+      width: 38px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--line);
+      margin: 10px auto 4px;
+    }
+
+    .sheet h3 {
+      font-size: 18px;
+      font-weight: 740;
+      margin: 6px 0 2px;
+    }
+
+    .sheet .lead {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .field {
+      margin-top: 16px;
+    }
+
+    .field>label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .field input[type=date],
+    .field input[type=number] {
+      width: 100%;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--paper);
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .field textarea {
+      width: 100%;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--paper);
+      color: var(--ink);
+      resize: vertical;
+      min-height: 46px;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      outline: 2px solid var(--aqua);
+      outline-offset: 0;
+      border-color: var(--aqua);
+      background: #fff;
+    }
+
+    .ph-fields {
+      display: flex;
+      gap: 12px;
+    }
+
+    .ph-fields .field {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      font-size: 13px;
+      font-weight: 640;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chip:active {
+      background: var(--paper);
+    }
+
+    .chip.on {
+      background: var(--aqua);
+      border-color: var(--aqua);
+      color: #fff;
+    }
+
+    .sheet-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .sheet-actions .btn-primary {
+      flex: 1;
+      justify-content: center;
+      background: var(--aqua);
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      font-weight: 720;
+      padding: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .sheet-actions .btn-primary:active {
+      filter: brightness(.95);
+    }
+
+    .btn-del {
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      background: #fff;
+      font-weight: 680;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    input[type=file] {
+      display: none;
+    }
+
+    .banner {
+      font-size: 12px;
+      color: var(--caution);
+      background: var(--caution-bg);
+      border: 1px solid #f1dcb4;
+      border-radius: 10px;
+      padding: 9px 12px;
+      margin-top: 14px;
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="eyebrow">Aquarium &middot; Water Parameters</div>
-    <h1>Water Log</h1>
-    <div class="sub" id="subline">&nbsp;</div>
-  </header>
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow">Aquarium &middot; Water Parameters</div>
+      <h1>Water Log</h1>
+      <div class="sub" id="subline">&nbsp;</div>
+    </header>
 
-  <div id="banner" class="banner hidden"></div>
+    <div id="banner" class="banner hidden"></div>
 
-  <!-- HERO STATUS -->
-  <div class="hero" id="hero"></div>
+    <!-- HERO STATUS -->
+    <div class="hero" id="hero"></div>
 
-  <!-- CHARTS -->
-  <section>
-    <div class="sec-head"><h2>Trends</h2></div>
-    <div class="card" id="charts"></div>
-  </section>
+    <!-- CHARTS -->
+    <section>
+      <div class="sec-head">
+        <h2>Trends</h2>
+      </div>
+      <div class="card" id="charts"></div>
+    </section>
 
-  <!-- HISTORY -->
-  <section>
-    <div class="sec-head"><h2>History</h2><span class="sub" id="count"></span></div>
-    <div class="card tbl-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th><th>pH</th><th>pH&nbsp;Hi</th>
-            <th>NH&#8323;</th><th>NO&#8322;</th><th>NO&#8323;</th><th>WC&nbsp;l</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    <p class="legend-key">NH&#8323; Ammonia &middot; NO&#8322; Nitrite &middot; NO&#8323; Nitrate &middot; WC Water change (litres)</p>
-    <div class="tools">
-      <button class="btn" id="exportCsv">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
-      </button>
-      <button class="btn" id="backup">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Backup
-      </button>
-      <button class="btn" id="restoreBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-        Restore
-      </button>
-      <input type="file" id="restoreFile" accept="application/json,.json">
-    </div>
-    <p class="note">Tap any row to edit or delete it.</p>
-    <p class="note">
-      <b>How your data is stored &amp; backed up.</b> Readings live only in this browser, on this phone
-      &mdash; nothing is sent to the cloud and nothing syncs across devices. Tapping <b>Backup</b> downloads
-      one file (a <b>.json</b>) holding every reading; keep that file somewhere off the phone &mdash; save it
-      to Google&nbsp;Drive or email it to yourself &mdash; and you&rsquo;ve got a safety copy. If you ever clear
-      browsing data or switch phones, <b>Restore</b> reads that file straight back in and you&rsquo;re exactly
-      where you left off. <b>Export&nbsp;CSV</b> is a different thing: a spreadsheet copy for Excel/Sheets &mdash;
-      useful, but it can&rsquo;t be loaded back in as a backup.
-    </p>
-  </section>
-</div>
+    <!-- HISTORY -->
+    <section>
+      <div class="sec-head">
+        <h2>History</h2><span class="sub" id="count"></span>
+      </div>
+      <div class="card tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>pH</th>
+              <th>pH&nbsp;Hi</th>
+              <th>NH&#8323;</th>
+              <th>NO&#8322;</th>
+              <th>NO&#8323;</th>
+              <th>WC&nbsp;l</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <p class="legend-key">NH&#8323; Ammonia &middot; NO&#8322; Nitrite &middot; NO&#8323; Nitrate &middot; WC Water
+        change (litres)</p>
+      <div class="tools">
+        <button class="btn" id="exportCsv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export CSV
+        </button>
+        <button class="btn" id="backup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Backup
+        </button>
+        <button class="btn" id="restoreBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M3 7v6h6" />
+            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+          </svg>
+          Restore
+        </button>
+        <input type="file" id="restoreFile" accept="application/json,.json">
+      </div>
+      <p class="note">Tap any row to edit or delete it.</p>
+      <p class="note">
+        <b>How your data is stored &amp; backed up.</b> Readings live only in this browser, on this phone
+        &mdash; nothing is sent to the cloud and nothing syncs across devices. Tapping <b>Backup</b> downloads
+        one file (a <b>.json</b>) holding every reading; keep that file somewhere off the phone &mdash; save it
+        to Google&nbsp;Drive or email it to yourself &mdash; and you&rsquo;ve got a safety copy. If you ever clear
+        browsing data or switch phones, <b>Restore</b> reads that file straight back in and you&rsquo;re exactly
+        where you left off. <b>Export&nbsp;CSV</b> is a different thing: a spreadsheet copy for Excel/Sheets &mdash;
+        useful, but it can&rsquo;t be loaded back in as a backup.
+      </p>
+    </section>
+  </div>
 
-<button class="fab" id="addBtn">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  Add reading
-</button>
+  <button class="fab" id="addBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+    Add reading
+  </button>
 
-<!-- SHEET -->
-<div class="scrim" id="scrim"></div>
-<div class="sheet" id="sheet">
-  <div class="sheet-inner">
-    <div class="grab"></div>
-    <h3 id="sheetTitle">New reading</h3>
-    <p class="lead">Tap a quick value or type your own. Date defaults to today.</p>
+  <!-- SHEET -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-inner">
+      <div class="grab"></div>
+      <h3 id="sheetTitle">New reading</h3>
+      <p class="lead">Tap a quick value or type your own. Date defaults to today.</p>
 
-    <div class="field">
-      <label for="f_date">Date</label>
-      <input type="date" id="f_date">
-    </div>
-
-    <div class="ph-fields" style="margin-top:16px;">
       <div class="field">
-        <label for="f_ph">pH (low range)</label>
-        <input type="number" inputmode="decimal" step="0.1" id="f_ph" placeholder="&ndash;">
-        <div class="chips" data-for="f_ph">
-          <button class="chip" type="button">7.0</button>
-          <button class="chip" type="button">7.2</button>
-          <button class="chip" type="button">7.4</button>
-          <button class="chip" type="button">7.6</button>
+        <label for="f_date">Date</label>
+        <input type="date" id="f_date">
+      </div>
+
+      <div class="ph-fields" style="margin-top:16px;">
+        <div class="field">
+          <label for="f_ph">pH (low range)</label>
+          <input type="number" inputmode="decimal" step="0.1" id="f_ph" placeholder="&ndash;">
+          <div class="chips" data-for="f_ph">
+            <button class="chip" type="button">7.0</button>
+            <button class="chip" type="button">7.2</button>
+            <button class="chip" type="button">7.4</button>
+            <button class="chip" type="button">7.6</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f_phh">pH (high range)</label>
+          <input type="number" inputmode="decimal" step="0.1" id="f_phh" placeholder="&ndash;">
+          <div class="chips" data-for="f_phh">
+            <button class="chip" type="button">7.4</button>
+            <button class="chip" type="button">7.8</button>
+            <button class="chip" type="button">8.0</button>
+            <button class="chip" type="button">8.2</button>
+          </div>
         </div>
       </div>
+
       <div class="field">
-        <label for="f_phh">pH (high range)</label>
-        <input type="number" inputmode="decimal" step="0.1" id="f_phh" placeholder="&ndash;">
-        <div class="chips" data-for="f_phh">
-          <button class="chip" type="button">7.4</button>
-          <button class="chip" type="button">7.8</button>
-          <button class="chip" type="button">8.0</button>
-          <button class="chip" type="button">8.2</button>
+        <label for="f_nh3">Ammonia &mdash; NH&#8323; (ppm)</label>
+        <input type="number" inputmode="decimal" step="0.05" id="f_nh3" placeholder="&ndash;">
+        <div class="chips" data-for="f_nh3">
+          <button class="chip" type="button">0</button>
+          <button class="chip" type="button">0.25</button>
+          <button class="chip" type="button">0.5</button>
+          <button class="chip" type="button">1</button>
+          <button class="chip" type="button">2</button>
+          <button class="chip" type="button">4</button>
         </div>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="f_nh3">Ammonia &mdash; NH&#8323; (ppm)</label>
-      <input type="number" inputmode="decimal" step="0.05" id="f_nh3" placeholder="&ndash;">
-      <div class="chips" data-for="f_nh3">
-        <button class="chip" type="button">0</button>
-        <button class="chip" type="button">0.25</button>
-        <button class="chip" type="button">0.5</button>
-        <button class="chip" type="button">1</button>
-        <button class="chip" type="button">2</button>
-        <button class="chip" type="button">4</button>
+      <div class="field">
+        <label for="f_no2">Nitrite &mdash; NO&#8322; (ppm)</label>
+        <input type="number" inputmode="decimal" step="0.25" id="f_no2" placeholder="&ndash;">
+        <div class="chips" data-for="f_no2">
+          <button class="chip" type="button">0</button>
+          <button class="chip" type="button">0.25</button>
+          <button class="chip" type="button">0.5</button>
+          <button class="chip" type="button">1</button>
+          <button class="chip" type="button">2</button>
+          <button class="chip" type="button">5</button>
+        </div>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="f_no2">Nitrite &mdash; NO&#8322; (ppm)</label>
-      <input type="number" inputmode="decimal" step="0.25" id="f_no2" placeholder="&ndash;">
-      <div class="chips" data-for="f_no2">
-        <button class="chip" type="button">0</button>
-        <button class="chip" type="button">0.25</button>
-        <button class="chip" type="button">0.5</button>
-        <button class="chip" type="button">1</button>
-        <button class="chip" type="button">2</button>
-        <button class="chip" type="button">5</button>
+      <div class="field">
+        <label for="f_no3">Nitrate &mdash; NO&#8323; (ppm)</label>
+        <input type="number" inputmode="decimal" step="5" id="f_no3" placeholder="&ndash;">
+        <div class="chips" data-for="f_no3">
+          <button class="chip" type="button">0</button>
+          <button class="chip" type="button">5</button>
+          <button class="chip" type="button">10</button>
+          <button class="chip" type="button">20</button>
+          <button class="chip" type="button">40</button>
+          <button class="chip" type="button">80</button>
+        </div>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="f_no3">Nitrate &mdash; NO&#8323; (ppm)</label>
-      <input type="number" inputmode="decimal" step="5" id="f_no3" placeholder="&ndash;">
-      <div class="chips" data-for="f_no3">
-        <button class="chip" type="button">0</button>
-        <button class="chip" type="button">5</button>
-        <button class="chip" type="button">10</button>
-        <button class="chip" type="button">20</button>
-        <button class="chip" type="button">40</button>
-        <button class="chip" type="button">80</button>
+      <div class="field">
+        <label for="f_wc">Water change after test (litres) &mdash; optional</label>
+        <input type="number" inputmode="decimal" step="1" id="f_wc" placeholder="&ndash;">
+        <div class="chips" data-for="f_wc">
+          <button class="chip" type="button">10</button>
+          <button class="chip" type="button">15</button>
+          <button class="chip" type="button">20</button>
+          <button class="chip" type="button">40</button>
+        </div>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="f_wc">Water change after test (litres) &mdash; optional</label>
-      <input type="number" inputmode="decimal" step="1" id="f_wc" placeholder="&ndash;">
-      <div class="chips" data-for="f_wc">
-        <button class="chip" type="button">10</button>
-        <button class="chip" type="button">15</button>
-        <button class="chip" type="button">20</button>
-        <button class="chip" type="button">40</button>
+      <div class="field">
+        <label for="f_notes">Notes &mdash; optional</label>
+        <textarea id="f_notes" rows="2" placeholder="e.g. dosed Prime, fish flashing, added plants&hellip;"></textarea>
       </div>
-    </div>
 
-    <div class="field">
-      <label for="f_notes">Notes &mdash; optional</label>
-      <textarea id="f_notes" rows="2" placeholder="e.g. dosed Prime, fish flashing, added plants&hellip;"></textarea>
-    </div>
-
-    <div class="sheet-actions">
-      <button class="btn-del hidden" id="deleteBtn" type="button">Delete</button>
-      <button class="btn-primary" id="saveBtn" type="button">Save reading</button>
+      <div class="sheet-actions">
+        <button class="btn-del hidden" id="deleteBtn" type="button">Delete</button>
+        <button class="btn-primary" id="saveBtn" type="button">Save reading</button>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-"use strict";
-(function(){
-  var KEY = "aqualog.readings.v1";
-  var memOnly = false;
+  <script>
+    "use strict";
+    (function () {
+      var KEY = "aqualog.readings.v1";
+      var memOnly = false;
 
-  // ---- seed (from existing sheet) ----
-  var SEED = [
-    {date:"2026-05-24", ph:7.6, phh:7.4, nh3:0.1,  no2:0.25, no3:20, wc:null},
-    {date:"2026-05-27", ph:7.6, phh:7.4, nh3:0.25, no2:2,    no3:40, wc:null},
-    {date:"2026-05-31", ph:7.6, phh:7.4, nh3:0.05, no2:5,    no3:80, wc:15},
-    {date:"2026-06-05", ph:null,phh:8.0, nh3:0,    no2:5,    no3:40, wc:null},
-    {date:"2026-06-09", ph:7.6, phh:8.0, nh3:0,    no2:0,    no3:40, wc:15},
-    {date:"2026-06-12", ph:null,phh:7.8, nh3:0,    no2:0,    no3:30, wc:null},
-    {date:"2026-06-14", ph:null,phh:7.8, nh3:0,    no2:0,    no3:40, wc:null}
-  ];
+      // ---- seed (empty: first launch starts clean) ----
+      var SEED = [];
 
-  var readings = load();
-  var editingId = null;
+      var readings = load();
+      var editingId = null;
 
-  // ---- storage ----
-  function load(){
-    try{
-      var raw = localStorage.getItem(KEY);
-      if(raw){ var d = JSON.parse(raw); if(Array.isArray(d)) return ensureIds(d); }
-    }catch(e){ memOnly = true; }
-    return ensureIds(SEED.map(function(r){return Object.assign({},r);}));
-  }
-  function save(){
-    if(memOnly) return;
-    try{ localStorage.setItem(KEY, JSON.stringify(readings)); }
-    catch(e){ memOnly = true; showBanner(); }
-  }
-  function ensureIds(arr){
-    return arr.map(function(r){ if(!r.id) r.id = uid(); return r; });
-  }
-  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+      // ---- storage ----
+      function load() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          if (raw) { var d = JSON.parse(raw); if (Array.isArray(d)) return ensureIds(d); }
+        } catch (e) { memOnly = true; }
+        return ensureIds(SEED.map(function (r) { return Object.assign({}, r); }));
+      }
+      function save() {
+        if (memOnly) return;
+        try { localStorage.setItem(KEY, JSON.stringify(readings)); }
+        catch (e) { memOnly = true; showBanner(); }
+      }
+      function ensureIds(arr) {
+        return arr.map(function (r) { if (!r.id) r.id = uid(); return r; });
+      }
+      function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-  function showBanner(){
-    var b = document.getElementById("banner");
-    b.textContent = "Storage is unavailable in this view, so changes last for this session only. Open this file directly in your phone browser (Safari / Chrome) to save permanently — or Back up regularly.";
-    b.classList.remove("hidden");
-  }
-  if(memOnly) showBanner();
+      function showBanner() {
+        var b = document.getElementById("banner");
+        b.textContent = "Storage is unavailable in this view, so changes last for this session only. Open this file directly in your phone browser (Safari / Chrome) to save permanently — or Back up regularly.";
+        b.classList.remove("hidden");
+      }
+      if (memOnly) showBanner();
 
-  // ---- helpers ----
-  function sorted(){
-    return readings.slice().sort(function(a,b){ return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
-  }
-  function fmtDate(iso){
-    if(!iso) return "";
-    var p = iso.split("-"); return p[2]+"/"+p[1]+"/"+p[0];
-  }
-  function fmtNum(v){
-    if(v===null||v===undefined||v==="") return null;
-    return (Math.round(v*100)/100).toString();
-  }
-  function statusNH3(v){ if(v===null) return "info"; if(v===0) return "safe"; if(v<0.5) return "caution"; return "danger"; }
-  function statusNO2(v){ if(v===null) return "info"; if(v===0) return "safe"; if(v<1) return "caution"; return "danger"; }
-  function statusNO3(v){ if(v===null) return "info"; if(v<=20) return "safe"; if(v<=40) return "caution"; return "danger"; }
-  var STATUS_COLOR = {safe:"var(--safe)",caution:"var(--caution)",danger:"var(--danger)",info:"var(--aqua)"};
+      // ---- helpers ----
+      function sorted() {
+        return readings.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+      }
+      function fmtDate(iso) {
+        if (!iso) return "";
+        var p = iso.split("-"); return p[2] + "/" + p[1] + "/" + p[0];
+      }
+      function fmtNum(v) {
+        if (v === null || v === undefined || v === "") return null;
+        return (Math.round(v * 100) / 100).toString();
+      }
+      function statusNH3(v) { if (v === null) return "info"; if (v === 0) return "safe"; if (v < 0.5) return "caution"; return "danger"; }
+      function statusNO2(v) { if (v === null) return "info"; if (v === 0) return "safe"; if (v < 1) return "caution"; return "danger"; }
+      function statusNO3(v) { if (v === null) return "info"; if (v <= 20) return "safe"; if (v <= 40) return "caution"; return "danger"; }
+      var STATUS_COLOR = { safe: "var(--safe)", caution: "var(--caution)", danger: "var(--danger)", info: "var(--aqua)" };
 
-  // ---- render hero ----
-  function renderHero(){
-    var hero = document.getElementById("hero");
-    var rows = sorted();
-    if(rows.length===0){ hero.innerHTML = '<div class="verdict">No readings yet — tap “Add reading”.</div>'; return; }
-    var r = rows[0];
-    var sN=statusNH3(r.nh3), sI=statusNO2(r.no2), sA=statusNO3(r.no3);
+      // ---- render hero ----
+      function renderHero() {
+        var hero = document.getElementById("hero");
+        var rows = sorted();
+        if (rows.length === 0) { hero.innerHTML = '<div class="verdict">No readings yet — tap “Add reading”.</div>'; return; }
+        var r = rows[0];
+        var sN = statusNH3(r.nh3), sI = statusNO2(r.no2), sA = statusNO3(r.no3);
 
-    var verdictTxt, verdictColor;
-    if(r.nh3===0 && r.no2===0){
-      verdictTxt = "Cycled — ammonia & nitrite clear"; verdictColor = "var(--safe)";
-      if(sA==="danger"){ verdictTxt = "Cycled, but nitrate high — water change due"; verdictColor="var(--caution)"; }
-    } else if(sN==="danger"||sI==="danger"){
-      verdictTxt = "Ammonia/nitrite spike — act now"; verdictColor="var(--danger)";
-    } else {
-      verdictTxt = "Still cycling — keep testing"; verdictColor="var(--caution)";
-    }
+        var verdictTxt, verdictColor;
+        if (r.nh3 === 0 && r.no2 === 0) {
+          verdictTxt = "Cycled — ammonia & nitrite clear"; verdictColor = "var(--safe)";
+          if (sA === "danger") { verdictTxt = "Cycled, but nitrate high — water change due"; verdictColor = "var(--caution)"; }
+        } else if (sN === "danger" || sI === "danger") {
+          verdictTxt = "Ammonia/nitrite spike — act now"; verdictColor = "var(--danger)";
+        } else {
+          verdictTxt = "Still cycling — keep testing"; verdictColor = "var(--caution)";
+        }
 
-    var ph = r.ph!==null ? fmtNum(r.ph) : (r.phh!==null ? fmtNum(r.phh) : "&ndash;");
-    var phLabel = r.ph!==null ? "pH" : (r.phh!==null ? "pH high" : "pH");
+        var ph = r.ph !== null ? fmtNum(r.ph) : (r.phh !== null ? fmtNum(r.phh) : "&ndash;");
+        var phLabel = r.ph !== null ? "pH" : (r.phh !== null ? "pH high" : "pH");
 
-    hero.innerHTML =
-      '<div class="when">'+
-        '<div class="verdict"><span class="dot" style="background:'+verdictColor+'"></span>'+verdictTxt+'</div>'+
-      '</div>'+
-      '<div class="when" style="margin-top:2px;"><span class="date">Latest &middot; '+fmtDate(r.date)+'</span></div>'+
-      '<div class="params">'+
-        paramCard("Ammonia", fmtNum(r.nh3), "ppm", sN, "NH&#8323;")+
-        paramCard("Nitrite", fmtNum(r.no2), "ppm", sI, "NO&#8322;")+
-        paramCard("Nitrate", fmtNum(r.no3), "ppm", sA, "NO&#8323;")+
-      '</div>'+
-      '<div class="ph-row">'+
-        paramCard(phLabel, ph, "", "info")+
-        (r.wc!==null ? paramCard("Water change", fmtNum(r.wc), "l", "info")
-                     : paramCard("Water change", "&ndash;", "", "info"))+
-      '</div>'+
-      (r.notes ? '<div class="hero-note">'+escapeHtml(r.notes)+'</div>' : '');
-  }
-  function paramCard(k,v,u,cls,formula){
-    if(v===null) v="&ndash;";
-    var f = formula ? ' <span class="kf">'+formula+'</span>' : '';
-    return '<div class="param '+cls+'"><div class="k">'+k+f+'</div>'+
-           '<div class="v num">'+v+(u?'<span class="u">'+u+'</span>':'')+'</div></div>';
-  }
+        hero.innerHTML =
+          '<div class="when">' +
+          '<div class="verdict"><span class="dot" style="background:' + verdictColor + '"></span>' + verdictTxt + '</div>' +
+          '</div>' +
+          '<div class="when" style="margin-top:2px;"><span class="date">Latest &middot; ' + fmtDate(r.date) + '</span></div>' +
+          '<div class="params">' +
+          paramCard("Ammonia", fmtNum(r.nh3), "ppm", sN, "NH&#8323;") +
+          paramCard("Nitrite", fmtNum(r.no2), "ppm", sI, "NO&#8322;") +
+          paramCard("Nitrate", fmtNum(r.no3), "ppm", sA, "NO&#8323;") +
+          '</div>' +
+          '<div class="ph-row">' +
+          paramCard(phLabel, ph, "", "info") +
+          (r.wc !== null ? paramCard("Water change", fmtNum(r.wc), "l", "info")
+            : paramCard("Water change", "&ndash;", "", "info")) +
+          '</div>' +
+          (r.notes ? '<div class="hero-note">' + escapeHtml(r.notes) + '</div>' : '');
+      }
+      function paramCard(k, v, u, cls, formula) {
+        if (v === null) v = "&ndash;";
+        var f = formula ? ' <span class="kf">' + formula + '</span>' : '';
+        return '<div class="param ' + cls + '"><div class="k">' + k + f + '</div>' +
+          '<div class="v num">' + v + (u ? '<span class="u">' + u + '</span>' : '') + '</div></div>';
+      }
 
-  // ---- charts (hand-rolled SVG, offline) ----
-  function renderCharts(){
-    var rows = sorted().slice().reverse(); // oldest -> newest
-    var c = document.getElementById("charts");
-    if(rows.length<1){ c.innerHTML = '<div class="chart">Add readings to see trends.</div>'; return; }
-    c.innerHTML =
-      chartBlock("Ammonia & Nitrite", rows, [
-        {key:"nh3", color:"var(--danger)", name:"NH&#8323;"},
-        {key:"no2", color:"var(--caution)", name:"NO&#8322;"}
-      ], null) +
-      chartBlock("Nitrate", rows, [
-        {key:"no3", color:"var(--aqua)", name:"NO&#8323;"}
-      ], 40) +
-      chartBlock("pH", rows, [
-        {key:"phh", color:"var(--aqua)", name:"pH high"},
-        {key:"ph",  color:"#6FB7BD", name:"pH low"}
-      ], null);
-  }
-  function chartBlock(label, rows, series, safeMax){
-    var W=480, H=150, padL=30, padR=10, padT=14, padB=22;
-    var vals=[];
-    series.forEach(function(s){ rows.forEach(function(r){ if(r[s.key]!==null && r[s.key]!==undefined) vals.push(r[s.key]); }); });
-    if(vals.length===0) return "";
-    var max=Math.max.apply(null,vals), min=Math.min.apply(null,vals);
-    if(label==="pH"){ max=Math.max(max,8.4); min=Math.min(min,6.8); }
-    else { min=0; max=Math.max(max, max*1.0); if(max===0)max=1; max=niceTop(max); }
-    var n=rows.length;
-    function x(i){ return padL + (n<=1?(W-padL-padR)/2:(i*(W-padL-padR)/(n-1))); }
-    function y(v){ return padT + (H-padT-padB)*(1-(v-min)/((max-min)||1)); }
+      // ---- charts (hand-rolled SVG, offline) ----
+      function renderCharts() {
+        var rows = sorted().slice().reverse(); // oldest -> newest
+        var c = document.getElementById("charts");
+        if (rows.length < 1) { c.innerHTML = '<div class="chart">Add readings to see trends.</div>'; return; }
+        c.innerHTML =
+          chartBlock("Ammonia & Nitrite", rows, [
+            { key: "nh3", color: "var(--danger)", name: "NH&#8323;" },
+            { key: "no2", color: "var(--caution)", name: "NO&#8322;" }
+          ], null) +
+          chartBlock("Nitrate", rows, [
+            { key: "no3", color: "var(--aqua)", name: "NO&#8323;" }
+          ], 40) +
+          chartBlock("pH", rows, [
+            { key: "phh", color: "var(--aqua)", name: "pH high" },
+            { key: "ph", color: "#6FB7BD", name: "pH low" }
+          ], null);
+      }
+      function chartBlock(label, rows, series, safeMax) {
+        var W = 480, H = 150, padL = 30, padR = 10, padT = 14, padB = 22;
+        var vals = [];
+        series.forEach(function (s) { rows.forEach(function (r) { if (r[s.key] !== null && r[s.key] !== undefined) vals.push(r[s.key]); }); });
+        if (vals.length === 0) return "";
+        var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+        if (label === "pH") { max = Math.max(max, 8.4); min = Math.min(min, 6.8); }
+        else { min = 0; max = Math.max(max, max * 1.0); if (max === 0) max = 1; max = niceTop(max); }
+        var n = rows.length;
+        function x(i) { return padL + (n <= 1 ? (W - padL - padR) / 2 : (i * (W - padL - padR) / (n - 1))); }
+        function y(v) { return padT + (H - padT - padB) * (1 - (v - min) / ((max - min) || 1)); }
 
-    var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img">';
-    // safe band
-    if(safeMax!==null){
-      var yb=y(safeMax);
-      svg+='<rect x="'+padL+'" y="'+yb+'" width="'+(W-padL-padR)+'" height="'+(H-padB-yb)+'" fill="var(--safe-bg)"/>';
-    }
-    // gridlines + y labels
-    var ticks=3;
-    for(var t=0;t<=ticks;t++){
-      var vv=min+(max-min)*t/ticks; var yy=y(vv);
-      svg+='<line x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'" stroke="var(--line)" stroke-width="1"/>';
-      svg+='<text x="'+(padL-5)+'" y="'+(yy+3)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+trimTick(vv)+'</text>';
-    }
-    // series
-    series.forEach(function(s){
-      var pts=[], dots="";
-      rows.forEach(function(r,i){
-        var v=r[s.key];
-        if(v===null||v===undefined) return;
-        var px=x(i), py=y(v);
-        pts.push(px+","+py);
-        dots+='<circle cx="'+px+'" cy="'+py+'" r="2.6" fill="'+s.color+'"/>';
-      });
-      if(pts.length) svg+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+dots;
-    });
-    // x labels (first / last)
-    svg+='<text x="'+x(0)+'" y="'+(H-6)+'" font-size="9" fill="var(--muted)" text-anchor="start">'+shortDate(rows[0].date)+'</text>';
-    if(n>1) svg+='<text x="'+x(n-1)+'" y="'+(H-6)+'" font-size="9" fill="var(--muted)" text-anchor="end">'+shortDate(rows[n-1].date)+'</text>';
-    svg+='</svg>';
+        var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img">';
+        // safe band
+        if (safeMax !== null) {
+          var yb = y(safeMax);
+          svg += '<rect x="' + padL + '" y="' + yb + '" width="' + (W - padL - padR) + '" height="' + (H - padB - yb) + '" fill="var(--safe-bg)"/>';
+        }
+        // gridlines + y labels
+        var ticks = 3;
+        for (var t = 0; t <= ticks; t++) {
+          var vv = min + (max - min) * t / ticks; var yy = y(vv);
+          svg += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="var(--line)" stroke-width="1"/>';
+          svg += '<text x="' + (padL - 5) + '" y="' + (yy + 3) + '" text-anchor="end" font-size="9" fill="var(--muted)">' + trimTick(vv) + '</text>';
+        }
+        // series
+        series.forEach(function (s) {
+          var pts = [], dots = "";
+          rows.forEach(function (r, i) {
+            var v = r[s.key];
+            if (v === null || v === undefined) return;
+            var px = x(i), py = y(v);
+            pts.push(px + "," + py);
+            dots += '<circle cx="' + px + '" cy="' + py + '" r="2.6" fill="' + s.color + '"/>';
+          });
+          if (pts.length) svg += '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + s.color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' + dots;
+        });
+        // x labels (first / last)
+        svg += '<text x="' + x(0) + '" y="' + (H - 6) + '" font-size="9" fill="var(--muted)" text-anchor="start">' + shortDate(rows[0].date) + '</text>';
+        if (n > 1) svg += '<text x="' + x(n - 1) + '" y="' + (H - 6) + '" font-size="9" fill="var(--muted)" text-anchor="end">' + shortDate(rows[n - 1].date) + '</text>';
+        svg += '</svg>';
 
-    var legend = series.map(function(s){ return '<span><i style="background:'+s.color+'"></i>'+s.name+'</span>'; }).join("");
-    return '<div class="chart"><div class="ct"><span class="label">'+label+'</span><span class="legend">'+legend+'</span></div>'+svg+'</div>';
-  }
-  function niceTop(v){ var steps=[1,2,5,10,20,40,80,160,320]; for(var i=0;i<steps.length;i++){ if(v<=steps[i]) return steps[i]; } return Math.ceil(v/100)*100; }
-  function trimTick(v){ return (Math.round(v*10)/10).toString().replace(/\.0$/,""); }
-  function shortDate(iso){ var p=iso.split("-"); return p[2]+"/"+p[1]; }
+        var legend = series.map(function (s) { return '<span><i style="background:' + s.color + '"></i>' + s.name + '</span>'; }).join("");
+        return '<div class="chart"><div class="ct"><span class="label">' + label + '</span><span class="legend">' + legend + '</span></div>' + svg + '</div>';
+      }
+      function niceTop(v) { var steps = [1, 2, 5, 10, 20, 40, 80, 160, 320]; for (var i = 0; i < steps.length; i++) { if (v <= steps[i]) return steps[i]; } return Math.ceil(v / 100) * 100; }
+      function trimTick(v) { return (Math.round(v * 10) / 10).toString().replace(/\.0$/, ""); }
+      function shortDate(iso) { var p = iso.split("-"); return p[2] + "/" + p[1]; }
 
-  // ---- table ----
-  function renderTable(){
-    var rows = sorted();
-    var tb = document.getElementById("tbody");
-    document.getElementById("count").textContent = rows.length + (rows.length===1?" reading":" readings");
-    document.getElementById("subline").textContent = rows.length ? (rows.length + " readings logged") : "Start logging your tank";
-    tb.innerHTML = rows.map(function(r){
-      var main = '<tr data-id="'+r.id+'">'+
-        '<td>'+fmtDate(r.date)+'</td>'+
-        '<td>'+cellPlain(r.ph)+'</td>'+
-        '<td>'+cellPlain(r.phh)+'</td>'+
-        '<td>'+cellPill(r.nh3, statusNH3(r.nh3))+'</td>'+
-        '<td>'+cellPill(r.no2, statusNO2(r.no2))+'</td>'+
-        '<td>'+cellPill(r.no3, statusNO3(r.no3))+'</td>'+
-        '<td>'+(r.wc!==null?'<span class="wc-tag num">'+fmtNum(r.wc)+'</span>':'<span class="dash">&ndash;</span>')+'</td>'+
-      '</tr>';
-      var note = r.notes ? '<tr class="note-row" data-id="'+r.id+'"><td colspan="7">'+escapeHtml(r.notes)+'</td></tr>' : '';
-      return main + note;
-    }).join("");
-    Array.prototype.forEach.call(tb.querySelectorAll("tr"), function(tr){
-      tr.addEventListener("click", function(){ openSheet(tr.getAttribute("data-id")); });
-    });
-  }
-  function cellPlain(v){ return v!==null ? '<span class="num">'+fmtNum(v)+'</span>' : '<span class="dash">&ndash;</span>'; }
-  function cellPill(v,cls){ return v!==null ? '<span class="pill '+cls+' num">'+fmtNum(v)+'</span>' : '<span class="dash">&ndash;</span>'; }
+      // ---- table ----
+      function renderTable() {
+        var rows = sorted();
+        var tb = document.getElementById("tbody");
+        document.getElementById("count").textContent = rows.length + (rows.length === 1 ? " reading" : " readings");
+        document.getElementById("subline").textContent = rows.length ? (rows.length + " readings logged") : "Start logging your tank";
+        tb.innerHTML = rows.map(function (r) {
+          var main = '<tr data-id="' + r.id + '">' +
+            '<td>' + fmtDate(r.date) + '</td>' +
+            '<td>' + cellPlain(r.ph) + '</td>' +
+            '<td>' + cellPlain(r.phh) + '</td>' +
+            '<td>' + cellPill(r.nh3, statusNH3(r.nh3)) + '</td>' +
+            '<td>' + cellPill(r.no2, statusNO2(r.no2)) + '</td>' +
+            '<td>' + cellPill(r.no3, statusNO3(r.no3)) + '</td>' +
+            '<td>' + (r.wc !== null ? '<span class="wc-tag num">' + fmtNum(r.wc) + '</span>' : '<span class="dash">&ndash;</span>') + '</td>' +
+            '</tr>';
+          var note = r.notes ? '<tr class="note-row" data-id="' + r.id + '"><td colspan="7">' + escapeHtml(r.notes) + '</td></tr>' : '';
+          return main + note;
+        }).join("");
+        Array.prototype.forEach.call(tb.querySelectorAll("tr"), function (tr) {
+          tr.addEventListener("click", function () { openSheet(tr.getAttribute("data-id")); });
+        });
+      }
+      function cellPlain(v) { return v !== null ? '<span class="num">' + fmtNum(v) + '</span>' : '<span class="dash">&ndash;</span>'; }
+      function cellPill(v, cls) { return v !== null ? '<span class="pill ' + cls + ' num">' + fmtNum(v) + '</span>' : '<span class="dash">&ndash;</span>'; }
 
-  function renderAll(){ renderHero(); renderCharts(); renderTable(); }
+      function renderAll() { renderHero(); renderCharts(); renderTable(); }
 
-  // ---- sheet ----
-  var scrim=document.getElementById("scrim"), sheet=document.getElementById("sheet");
-  var fields={date:"f_date",ph:"f_ph",phh:"f_phh",nh3:"f_nh3",no2:"f_no2",no3:"f_no3",wc:"f_wc",notes:"f_notes"};
+      // ---- sheet ----
+      var scrim = document.getElementById("scrim"), sheet = document.getElementById("sheet");
+      var fields = { date: "f_date", ph: "f_ph", phh: "f_phh", nh3: "f_nh3", no2: "f_no2", no3: "f_no3", wc: "f_wc", notes: "f_notes" };
 
-  function todayISO(){ var d=new Date(); var m=("0"+(d.getMonth()+1)).slice(-2),day=("0"+d.getDate()).slice(-2); return d.getFullYear()+"-"+m+"-"+day; }
+      function todayISO() { var d = new Date(); var m = ("0" + (d.getMonth() + 1)).slice(-2), day = ("0" + d.getDate()).slice(-2); return d.getFullYear() + "-" + m + "-" + day; }
 
-  function openSheet(id){
-    editingId = id || null;
-    clearChips();
-    var del=document.getElementById("deleteBtn");
-    if(id){
-      var r = readings.filter(function(x){return x.id===id;})[0];
-      document.getElementById("sheetTitle").textContent="Edit reading";
-      setVal("f_date", r.date);
-      setVal("f_ph", r.ph); setVal("f_phh", r.phh);
-      setVal("f_nh3", r.nh3); setVal("f_no2", r.no2); setVal("f_no3", r.no3); setVal("f_wc", r.wc);
-      setVal("f_notes", r.notes);
-      del.classList.remove("hidden");
-    } else {
-      document.getElementById("sheetTitle").textContent="New reading";
-      for(var k in fields){ document.getElementById(fields[k]).value=""; }
-      setVal("f_date", todayISO());
-      del.classList.add("hidden");
-    }
-    syncChips();
-    scrim.classList.add("open"); sheet.classList.add("open");
-  }
-  function closeSheet(){ scrim.classList.remove("open"); sheet.classList.remove("open"); }
-  function setVal(id,v){ document.getElementById(id).value=(v===null||v===undefined)?"":v; }
-  function getNum(id){ var v=document.getElementById(id).value.trim(); return v===""?null:parseFloat(v); }
-  function getText(id){ var v=document.getElementById(id).value.trim(); return v===""?null:v; }
-  function escapeHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-  document.getElementById("addBtn").addEventListener("click", function(){ openSheet(null); });
-  scrim.addEventListener("click", closeSheet);
-
-  // chips
-  Array.prototype.forEach.call(document.querySelectorAll(".chips"), function(grp){
-    var targetId = grp.getAttribute("data-for");
-    Array.prototype.forEach.call(grp.querySelectorAll(".chip"), function(chip){
-      chip.addEventListener("click", function(){
-        document.getElementById(targetId).value = chip.textContent.trim();
+      function openSheet(id) {
+        editingId = id || null;
+        clearChips();
+        var del = document.getElementById("deleteBtn");
+        if (id) {
+          var r = readings.filter(function (x) { return x.id === id; })[0];
+          document.getElementById("sheetTitle").textContent = "Edit reading";
+          setVal("f_date", r.date);
+          setVal("f_ph", r.ph); setVal("f_phh", r.phh);
+          setVal("f_nh3", r.nh3); setVal("f_no2", r.no2); setVal("f_no3", r.no3); setVal("f_wc", r.wc);
+          setVal("f_notes", r.notes);
+          del.classList.remove("hidden");
+        } else {
+          document.getElementById("sheetTitle").textContent = "New reading";
+          for (var k in fields) { document.getElementById(fields[k]).value = ""; }
+          setVal("f_date", todayISO());
+          del.classList.add("hidden");
+        }
         syncChips();
+        scrim.classList.add("open"); sheet.classList.add("open");
+      }
+      function closeSheet() { scrim.classList.remove("open"); sheet.classList.remove("open"); }
+      function setVal(id, v) { document.getElementById(id).value = (v === null || v === undefined) ? "" : v; }
+      function getNum(id) { var v = document.getElementById(id).value.trim(); return v === "" ? null : parseFloat(v); }
+      function getText(id) { var v = document.getElementById(id).value.trim(); return v === "" ? null : v; }
+      function escapeHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+      document.getElementById("addBtn").addEventListener("click", function () { openSheet(null); });
+      scrim.addEventListener("click", closeSheet);
+
+      // chips
+      Array.prototype.forEach.call(document.querySelectorAll(".chips"), function (grp) {
+        var targetId = grp.getAttribute("data-for");
+        Array.prototype.forEach.call(grp.querySelectorAll(".chip"), function (chip) {
+          chip.addEventListener("click", function () {
+            document.getElementById(targetId).value = chip.textContent.trim();
+            syncChips();
+          });
+        });
+        document.getElementById(targetId).addEventListener("input", syncChips);
       });
-    });
-    document.getElementById(targetId).addEventListener("input", syncChips);
-  });
-  function clearChips(){ Array.prototype.forEach.call(document.querySelectorAll(".chip"), function(c){ c.classList.remove("on"); }); }
-  function syncChips(){
-    Array.prototype.forEach.call(document.querySelectorAll(".chips"), function(grp){
-      var val=document.getElementById(grp.getAttribute("data-for")).value.trim();
-      Array.prototype.forEach.call(grp.querySelectorAll(".chip"), function(chip){
-        chip.classList.toggle("on", chip.textContent.trim()===val && val!=="");
+      function clearChips() { Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) { c.classList.remove("on"); }); }
+      function syncChips() {
+        Array.prototype.forEach.call(document.querySelectorAll(".chips"), function (grp) {
+          var val = document.getElementById(grp.getAttribute("data-for")).value.trim();
+          Array.prototype.forEach.call(grp.querySelectorAll(".chip"), function (chip) {
+            chip.classList.toggle("on", chip.textContent.trim() === val && val !== "");
+          });
+        });
+      }
+
+      document.getElementById("saveBtn").addEventListener("click", function () {
+        var date = document.getElementById("f_date").value;
+        if (!date) { document.getElementById("f_date").focus(); return; }
+        var rec = {
+          date: date, ph: getNum("f_ph"), phh: getNum("f_phh"),
+          nh3: getNum("f_nh3"), no2: getNum("f_no2"), no3: getNum("f_no3"), wc: getNum("f_wc"),
+          notes: getText("f_notes")
+        };
+        if (editingId) {
+          readings = readings.map(function (r) { return r.id === editingId ? Object.assign(r, rec) : r; });
+        } else {
+          rec.id = uid(); readings.push(rec);
+        }
+        save(); renderAll(); closeSheet();
       });
-    });
-  }
 
-  document.getElementById("saveBtn").addEventListener("click", function(){
-    var date=document.getElementById("f_date").value;
-    if(!date){ document.getElementById("f_date").focus(); return; }
-    var rec={ date:date, ph:getNum("f_ph"), phh:getNum("f_phh"),
-              nh3:getNum("f_nh3"), no2:getNum("f_no2"), no3:getNum("f_no3"), wc:getNum("f_wc"),
-              notes:getText("f_notes") };
-    if(editingId){
-      readings = readings.map(function(r){ return r.id===editingId ? Object.assign(r, rec) : r; });
-    } else {
-      rec.id = uid(); readings.push(rec);
-    }
-    save(); renderAll(); closeSheet();
-  });
+      document.getElementById("deleteBtn").addEventListener("click", function () {
+        if (!editingId) return;
+        if (confirm("Delete this reading?")) {
+          readings = readings.filter(function (r) { return r.id !== editingId; });
+          save(); renderAll(); closeSheet();
+        }
+      });
 
-  document.getElementById("deleteBtn").addEventListener("click", function(){
-    if(!editingId) return;
-    if(confirm("Delete this reading?")){
-      readings = readings.filter(function(r){ return r.id!==editingId; });
-      save(); renderAll(); closeSheet();
-    }
-  });
+      // ---- export / backup / restore ----
+      function download(name, text, type) {
+        var blob = new Blob([text], { type: type });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click();
+        setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+      }
+      document.getElementById("exportCsv").addEventListener("click", function () {
+        var head = ["DATE", "PH", "PH HIGH", "AMMONIA (ppm)", "NITRITE (ppm)", "NITRATE (ppm)", "Water Change Post test (l)", "NOTES"];
+        var lines = [head.join(",")];
+        sorted().slice().reverse().forEach(function (r) {
+          lines.push([fmtDate(r.date), nz(r.ph), nz(r.phh), nz(r.nh3), nz(r.no2), nz(r.no3), nz(r.wc), csvCell(r.notes)].join(","));
+        });
+        download("aquarium-water-log.csv", lines.join("\n"), "text/csv");
+      });
+      function nz(v) { return v === null || v === undefined ? "" : v; }
+      function csvCell(v) {
+        if (v === null || v === undefined) return "";
+        var s = String(v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }
 
-  // ---- export / backup / restore ----
-  function download(name, text, type){
-    var blob=new Blob([text],{type:type});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click();
-    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },100);
-  }
-  document.getElementById("exportCsv").addEventListener("click", function(){
-    var head=["DATE","PH","PH HIGH","AMMONIA (ppm)","NITRITE (ppm)","NITRATE (ppm)","Water Change Post test (l)","NOTES"];
-    var lines=[head.join(",")];
-    sorted().slice().reverse().forEach(function(r){
-      lines.push([fmtDate(r.date), nz(r.ph), nz(r.phh), nz(r.nh3), nz(r.no2), nz(r.no3), nz(r.wc), csvCell(r.notes)].join(","));
-    });
-    download("aquarium-water-log.csv", lines.join("\n"), "text/csv");
-  });
-  function nz(v){ return v===null||v===undefined?"":v; }
-  function csvCell(v){
-    if(v===null||v===undefined) return "";
-    var s=String(v);
-    return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
-  }
+      document.getElementById("backup").addEventListener("click", function () {
+        download("aquarium-water-log-backup.json", JSON.stringify(readings, null, 2), "application/json");
+      });
+      document.getElementById("restoreBtn").addEventListener("click", function () { document.getElementById("restoreFile").click(); });
+      document.getElementById("restoreFile").addEventListener("change", function (e) {
+        var file = e.target.files[0]; if (!file) return;
+        var fr = new FileReader();
+        fr.onload = function () {
+          try {
+            var data = JSON.parse(fr.result);
+            if (Array.isArray(data)) { readings = ensureIds(data); save(); renderAll(); }
+            else alert("That file doesn't look like a backup.");
+          } catch (err) { alert("Couldn't read that backup file."); }
+        };
+        fr.readAsText(file);
+        e.target.value = "";
+      });
 
-  document.getElementById("backup").addEventListener("click", function(){
-    download("aquarium-water-log-backup.json", JSON.stringify(readings,null,2), "application/json");
-  });
-  document.getElementById("restoreBtn").addEventListener("click", function(){ document.getElementById("restoreFile").click(); });
-  document.getElementById("restoreFile").addEventListener("change", function(e){
-    var file=e.target.files[0]; if(!file) return;
-    var fr=new FileReader();
-    fr.onload=function(){
-      try{
-        var data=JSON.parse(fr.result);
-        if(Array.isArray(data)){ readings=ensureIds(data); save(); renderAll(); }
-        else alert("That file doesn't look like a backup.");
-      }catch(err){ alert("Couldn't read that backup file."); }
-    };
-    fr.readAsText(file);
-    e.target.value="";
-  });
-
-  renderAll();
-})();
-</script>
+      renderAll();
+    })();
+  </script>
 </body>
+
 </html>
